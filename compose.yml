@@ -1,0 +1,125 @@
+services:
+  btc:
+    container_name: btc
+    image: bitcoin/bitcoin:latest
+    command:
+      -printtoconsole
+      -rpcallowip=0.0.0.0/0
+      -rpcbind=0.0.0.0
+      -rpcauth=${RPC_AUTH}
+      -maxconnections=50
+      -txindex=1
+      -rest
+      -zmqpubrawblock=tcp://0.0.0.0:28332
+      -zmqpubrawtx=tcp://0.0.0.0:28333
+      # -testnet=1
+      # -regtest=1
+    volumes:
+      - /data/btc:/home/bitcoin/.bitcoin
+    ports:
+      # Mainnet
+      - "8332:8332" # JSON-RPC/REST
+      - "8333:8333" # P2P
+      - "28332:28332" # ZMQ blocks
+      - "28333:28333" # ZMQ transactions
+      # # Testnet
+      # - "18332:18332" # RPC
+      # - "18333:18333" # P2P
+      # # Regtest
+      # - "18443:18443" # RPC
+      # - "18444:18444" # P2P
+      # # Signet
+      # - "38332:38332" # RPC
+      # - "38333:38333" # P2P
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'bitcoin-cli -rpcconnect=127.0.0.1 -rpcuser=satoshi -rpcpassword=${RPC_PASSWORD} getblockchaininfo | grep -q ''"initialblockdownload": false''',
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - bitcoin_network
+
+  ord:
+    container_name: ord
+    build:
+      context: https://github.com/Th0rgal/ord.git#fix/rust_version
+      dockerfile: Dockerfile
+    command:
+      - ord
+      - --bitcoin-rpc-url=http://btc:8332
+      - --bitcoin-rpc-username=satoshi
+      - --bitcoin-rpc-password=${RPC_PASSWORD}
+      - --index-sats
+      - --index-runes
+      - --index-addresses
+      - server
+      - --http
+      # - --https
+      # - --acme-domain=ord.lfg.rs
+      # - --acme-contact=mailto:thomas@lfglabs.dev
+      # - --acme-cache=/home/ord/.acme-cache
+      # - --redirect-http-to-https
+      # - --csp-origin=https://ord.lfg.rs
+    volumes:
+      - /data/ord:/root/.local/share/ord
+      - /data/acme:/home/ord/.acme-cache
+    ports:
+      - "8080:80"
+    depends_on:
+      btc:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - bitcoin_network
+
+  nginx:
+    container_name: nginx
+    image: jonasal/nginx-certbot:latest
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - nginx_secrets:/etc/letsencrypt
+      - ./user_conf.d:/etc/nginx/user_conf.d
+    env_file:
+      - nginx-certbot.env
+    depends_on:
+      btc:
+        condition: service_healthy
+      ord:
+        condition: service_started
+    networks:
+      - bitcoin_network
+
+  utu_api:
+    container_name: utu_api
+    # todo for prod: switch to PROD env variable
+    build:
+      context: https://github.com/lfglabs-dev/api.utu.lfg.rs.git#master
+      dockerfile: Dockerfile
+    volumes:
+      - type: bind
+        source: ./.env
+        target: /app/.env.keys
+    depends_on:
+      btc:
+        condition: service_healthy
+      ord:
+        condition: service_started
+    restart: unless-stopped
+    networks:
+      - bitcoin_network
+
+volumes:
+  nginx_secrets:
+
+networks:
+  bitcoin_network:
+    name: bitcoin_network
+    driver: bridge

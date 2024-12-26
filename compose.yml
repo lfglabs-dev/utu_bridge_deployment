@@ -116,6 +116,23 @@ services:
     networks:
       - bitcoin_network
 
+  utu_auto_claim:
+    container_name: utu_auto_claim
+    # todo for prod: switch to PROD env variable
+    build:
+      context: https://github.com/lfglabs-dev/utu_bridge_auto_claim.git#main
+      dockerfile: Dockerfile
+    volumes:
+      - type: bind
+        source: ./.env
+        target: /app/.env.keys
+    depends_on:
+      utu_api:
+        condition: service_started
+    restart: unless-stopped
+    networks:
+      - bitcoin_network
+
 volumes:
   nginx_secrets:
 

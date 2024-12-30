@@ -133,7 +133,33 @@ services:
     networks:
       - bitcoin_network
 
+  etcd:
+    image: docker.io/bitnami/etcd:3.5
+    environment:
+      ALLOW_NONE_AUTHENTICATION: "yes"
+    volumes:
+      - etcd_data:/bitnami/etcd
+
+  utu_bridge_indexer:
+    build:
+      context: https://github.com/lfglabs-dev/utu_bridge_indexer.git#main
+      dockerfile: Dockerfile
+    depends_on:
+      - etcd
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    volumes:
+      - type: bind
+        source: ./.env
+        target: /data/env
+    environment:
+      PERSIST_TO_ETCD: http://etcd:2379
+      SINK_ID: utu_bridge_indexer
+      AUTH_TOKEN: dna_kYXQudNzRv0klWcPzd13
+
 volumes:
+  etcd_data:
   nginx_secrets:
 
 networks:

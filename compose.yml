@@ -140,10 +140,15 @@ services:
     volumes:
       - etcd_data:/bitnami/etcd
 
-  utu_bridge_indexer:
+  utu_bridge_deposits_indexer:
     build:
       context: https://github.com/lfglabs-dev/utu_bridge_indexer.git#main
       dockerfile: Dockerfile
+    command:
+      - run
+      - --allow-env=/data/env
+      - /data/src/deposit_claim_txs.ts
+      - --status-server-address=0.0.0.0:8081
     depends_on:
       - etcd
     restart: unless-stopped
@@ -155,7 +160,30 @@ services:
         target: /data/env
     environment:
       PERSIST_TO_ETCD: http://etcd:2379
-      SINK_ID: utu_bridge_indexer
+      SINK_ID: utu_bridge_deposits_indexer
+      AUTH_TOKEN: dna_kYXQudNzRv0klWcPzd13
+
+  utu_bridge_withdrawals_indexer:
+    build:
+      context: https://github.com/lfglabs-dev/utu_bridge_indexer.git#main
+      dockerfile: Dockerfile
+    command:
+      - run
+      - --allow-env=/data/env
+      - /data/src/withdrawal_requests.ts
+      - --status-server-address=0.0.0.0:8082
+    depends_on:
+      - etcd
+    restart: unless-stopped
+    ports:
+      - "8082:8082"
+    volumes:
+      - type: bind
+        source: ./.env
+        target: /data/env
+    environment:
+      PERSIST_TO_ETCD: http://etcd:2379
+      SINK_ID: utu_bridge_withdrawals_indexer
       AUTH_TOKEN: dna_kYXQudNzRv0klWcPzd13
 
 volumes:

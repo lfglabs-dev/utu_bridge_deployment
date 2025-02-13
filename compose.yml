@@ -135,7 +135,7 @@ services:
     volumes:
       - type: bind
         source: ./private_deposit.pem
-        target: /app/deposit.pem
+        target: /app/private_deposit.pem
       - type: bind
         source: ./.env
         target: /app/.env.keys

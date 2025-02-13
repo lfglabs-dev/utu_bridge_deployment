@@ -1,4 +1,5 @@
 services:
+  # port: 8332, 8333, 28332, 28333
   btc:
     container_name: btc
     image: bitcoin/bitcoin:latest
@@ -44,6 +45,7 @@ services:
     networks:
       - bitcoin_network
 
+  # port: 8080, 80
   ord:
     container_name: ord
     build:
@@ -97,16 +99,23 @@ services:
     networks:
       - bitcoin_network
 
+  # port: 8081
   utu_api:
     container_name: utu_api
     # todo for prod: switch to PROD env variable
+    # build:
+    #   context: https://github.com/lfglabs-dev/api.utu.lfg.rs.git#master
+    #   dockerfile: Dockerfile
     build:
-      context: https://github.com/lfglabs-dev/api.utu.lfg.rs.git#master
+      context: ./api.utu.lfg.rs
       dockerfile: Dockerfile
     volumes:
       - type: bind
         source: ./.env
         target: /app/.env.keys
+      # - type: bind
+      #   source: ./utu_bridge_deposit_address
+      #   target: /utu_bridge_deposit_address
     depends_on:
       btc:
         condition: service_healthy
@@ -116,13 +125,17 @@ services:
     networks:
       - bitcoin_network
 
-  utu_auto_claim:
-    container_name: utu_auto_claim
+  # port: 8082
+  utu_bridge_deposit_request:
+    container_name: utu_bridge_deposit_request
     # todo for prod: switch to PROD env variable
     build:
-      context: https://github.com/lfglabs-dev/utu_bridge_auto_claim.git#main
+      context: https://github.com/lfglabs-dev/utu_bridge_deposit_request.git#main
       dockerfile: Dockerfile
     volumes:
+      - type: bind
+        source: ./private_deposit.pem
+        target: /app/deposit.pem
       - type: bind
         source: ./.env
         target: /app/.env.keys
@@ -133,6 +146,66 @@ services:
     networks:
       - bitcoin_network
 
+  # port: 8083
+  # utu_bridge_deposit_signer:
+  #   container_name: utu_bridge_deposit_signer
+  #   # todo for prod: switch to PROD env variable
+  #   build:
+  #     context: https://github.com/lfglabs-dev/utu_bridge_deposit_signer.git#main
+  #     dockerfile: Dockerfile
+  #   volumes:
+  #     - type: bind
+  #       source: ./deposit_signer_config.toml
+  #       target: /app/config.toml
+  #     - type: bind
+  #       source: ./private_deposit.pem
+  #       target: /app/deposit.pem
+  #   depends_on:
+  #     utu_api:
+  #       condition: service_started
+  #   restart: unless-stopped
+  #   networks:
+  #     - bitcoin_network
+
+  # port: 8084
+  # utu_bridge_withdrawals_request:
+  #   container_name: utu_bridge_withdrawals_request
+  #   # todo for prod: switch to PROD env variable
+  #   build:
+  #     context: https://github.com/lfglabs-dev/utu_bridge_withdrawals_request.git#main
+  #     dockerfile: Dockerfile
+  #   volumes:
+  #     - type: bind
+  #       source: ./.env
+  #       target: /app/.env.keys
+  #   depends_on:
+  #     utu_api:
+  #       condition: service_started
+  #   restart: unless-stopped
+  #   networks:
+  #     - bitcoin_network
+
+  # port: 8085
+  # utu_bridge_withdrawals_signer:
+  #   container_name: utu_bridge_withdrawals_signer
+  #   # todo for prod: switch to PROD env variable
+  #   # build:
+  #   #   context: https://github.com/lfglabs-dev/utu_bridge_withdrawals_signer.git#main
+  #   #   dockerfile: Dockerfile
+  #   build:
+  #     context: ./utu_bridge_withdrawals_signer
+  #     dockerfile: Dockerfile
+  #   volumes:
+  #     - type: bind
+  #       source: ./withdrawals_signer_config.toml
+  #       target: /app/config.toml
+  #   depends_on:
+  #     utu_api:
+  #       condition: service_started
+  #   restart: unless-stopped
+  #   networks:
+  #     - bitcoin_network
+
   etcd:
     image: docker.io/bitnami/etcd:3.5
     environment:
@@ -140,6 +213,7 @@ services:
     volumes:
       - etcd_data:/bitnami/etcd
 
+  # port: 8086
   utu_bridge_deposits_indexer:
     build:
       context: https://github.com/lfglabs-dev/utu_bridge_indexer.git#main
@@ -148,12 +222,12 @@ services:
       - run
       - --allow-env=/data/env
       - /data/src/deposit_claim_txs.ts
-      - --status-server-address=0.0.0.0:8081
+      - --status-server-address=0.0.0.0:8086
     depends_on:
       - etcd
     restart: unless-stopped
     ports:
-      - "8081:8081"
+      - "8086:8086"
     volumes:
       - type: bind
         source: ./.env
@@ -163,6 +237,7 @@ services:
       SINK_ID: utu_bridge_deposits_indexer
       AUTH_TOKEN: dna_kYXQudNzRv0klWcPzd13
 
+  # port: 8087
   utu_bridge_withdrawals_indexer:
     build:
       context: https://github.com/lfglabs-dev/utu_bridge_indexer.git#main
@@ -171,12 +246,12 @@ services:
       - run
       - --allow-env=/data/env
       - /data/src/withdrawal_requests.ts
-      - --status-server-address=0.0.0.0:8082
+      - --status-server-address=0.0.0.0:8087
     depends_on:
       - etcd
     restart: unless-stopped
     ports:
-      - "8082:8082"
+      - "8087:8087"
     volumes:
       - type: bind
         source: ./.env

@@ -147,25 +147,25 @@ services:
       - bitcoin_network
 
   # port: 8083
-  # utu_bridge_deposit_signer:
-  #   container_name: utu_bridge_deposit_signer
-  #   # todo for prod: switch to PROD env variable
-  #   build:
-  #     context: https://github.com/lfglabs-dev/utu_bridge_deposit_signer.git#main
-  #     dockerfile: Dockerfile
-  #   volumes:
-  #     - type: bind
-  #       source: ./deposit_signer_config.toml
-  #       target: /app/config.toml
-  #     - type: bind
-  #       source: ./private_deposit.pem
-  #       target: /app/deposit.pem
-  #   depends_on:
-  #     utu_api:
-  #       condition: service_started
-  #   restart: unless-stopped
-  #   networks:
-  #     - bitcoin_network
+  utu_bridge_deposit_signer:
+    container_name: utu_bridge_deposit_signer
+    # todo for prod: switch to PROD env variable
+    build:
+      context: ./utu_bridge_deposit_signer
+      dockerfile: Dockerfile
+    volumes:
+      - type: bind
+        source: ./deposit_signer_config.toml
+        target: /app/config.toml
+      - type: bind
+        source: ./private_deposit.pem
+        target: /app/deposit.pem
+    depends_on:
+      utu_api:
+        condition: service_started
+    restart: unless-stopped
+    networks:
+      - bitcoin_network
 
   # port: 8084
   # utu_bridge_withdrawals_request:

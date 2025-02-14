@@ -134,7 +134,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - type: bind
-        source: ./private_deposit.pem
+        source: ./private_operator.pem
         target: /app/private_deposit.pem
       - type: bind
         source: ./.env

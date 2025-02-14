@@ -113,9 +113,6 @@ services:
       - type: bind
         source: ./.env
         target: /app/.env.keys
-      # - type: bind
-      #   source: ./utu_bridge_deposit_address
-      #   target: /utu_bridge_deposit_address
     depends_on:
       btc:
         condition: service_healthy
@@ -125,7 +122,6 @@ services:
     networks:
       - bitcoin_network
 
-  # port: 8082
   utu_bridge_deposit_request:
     container_name: utu_bridge_deposit_request
     # todo for prod: switch to PROD env variable
@@ -146,7 +142,7 @@ services:
     networks:
       - bitcoin_network
 
-  # port: 8083
+  # port: 8080
   utu_bridge_deposit_signer:
     container_name: utu_bridge_deposit_signer
     # todo for prod: switch to PROD env variable
@@ -160,30 +156,15 @@ services:
       - type: bind
         source: ./private_deposit.pem
         target: /app/deposit.pem
+      - type: bind
+        source: ./deposit_signer_data
+        target: /data
     depends_on:
       utu_api:
         condition: service_started
     restart: unless-stopped
     networks:
       - bitcoin_network
-
-  # port: 8084
-  # utu_bridge_withdrawals_request:
-  #   container_name: utu_bridge_withdrawals_request
-  #   # todo for prod: switch to PROD env variable
-  #   build:
-  #     context: https://github.com/lfglabs-dev/utu_bridge_withdrawals_request.git#main
-  #     dockerfile: Dockerfile
-  #   volumes:
-  #     - type: bind
-  #       source: ./.env
-  #       target: /app/.env.keys
-  #   depends_on:
-  #     utu_api:
-  #       condition: service_started
-  #   restart: unless-stopped
-  #   networks:
-  #     - bitcoin_network
 
   # port: 8085
   # utu_bridge_withdrawals_signer:

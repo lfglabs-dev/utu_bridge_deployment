@@ -1,0 +1,36 @@
+[
+  {
+    "id": "840000:3",
+    "name": "DOGGOTOTHEMOON",
+    "spaced_name": "DOG•GO•TO•THE•MOON",
+    "number": 3,
+    "divisibility": 5,
+    "symbol": "🐕",
+    "turbo": false,
+    "mint_terms": {
+      "amount": null,
+      "cap": null,
+      "height_start": null,
+      "height_end": null,
+      "offset_start": null,
+      "offset_end": null
+    },
+    "supply": {
+      "current": "100023486991.67000",
+      "minted": "0.00000",
+      "total_mints": "0",
+      "mint_percentage": "0.0000",
+      "mintable": false,
+      "burned": "23486991.67000",
+      "total_burns": "7",
+      "premine": "100000000000.00000"
+    },
+    "location": {
+      "block_hash": "0000000000000000000320283a032748cef8227873ff4872689bf23f1cda83a5",
+      "block_height": 840000,
+      "tx_id": "e79134080a83fe3e0e06ed6990c5a9b63b362313341745707a2bff7d788a1375",
+      "tx_index": 3,
+      "timestamp": 1713571767
+    }
+  }
+]

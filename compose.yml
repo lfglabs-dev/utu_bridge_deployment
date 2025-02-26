@@ -163,7 +163,6 @@ services:
     networks:
       - bitcoin_network
 
-  # port: 8085
   utu_bridge_withdrawals_signer:
     container_name: utu_bridge_withdrawals_signer
     # todo for prod: switch to PROD env variable
@@ -180,6 +179,25 @@ services:
       - type: bind
         source: ./withdrawals_signer_data
         target: /data
+    depends_on:
+      utu_api:
+        condition: service_started
+    restart: unless-stopped
+    networks:
+      - bitcoin_network
+
+  utu_bridge_withdrawals_dispatcher:
+    container_name: utu_bridge_withdrawals_dispatcher
+    build:
+      context: ./utu_bridge_withdrawals_dispatcher
+      dockerfile: Dockerfile
+    volumes:
+      - type: bind
+        source: ./public_fordefi.pem
+        target: /app/public_key.pem
+      - type: bind
+        source: ./withdrawals_dispatcher_config.toml
+        target: /app/config.toml
     depends_on:
       utu_api:
         condition: service_started

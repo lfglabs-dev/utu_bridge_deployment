@@ -156,6 +156,9 @@ services:
       - type: bind
         source: ./deposit_signer_data
         target: /data
+      - type: bind
+        source: ./history/finalized_deposits
+        target: /app/finalized_deposits
     depends_on:
       utu_api:
         condition: service_started
@@ -198,6 +201,9 @@ services:
       - type: bind
         source: ./withdrawals_dispatcher_config.toml
         target: /app/config.toml
+      - type: bind
+        source: ./history/finalized_withdrawals
+        target: /app/finalized_withdrawals
     depends_on:
       utu_api:
         condition: service_started

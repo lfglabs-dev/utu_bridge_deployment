@@ -154,7 +154,7 @@ services:
         source: ./deposit_signer_config.toml
         target: /app/config.toml
       - type: bind
-        source: ./deposit_signer_data
+        source: ./signer_data
         target: /data
       - type: bind
         source: ./history/finalized_deposits
@@ -180,7 +180,7 @@ services:
         source: ./withdrawals_signer_config.toml
         target: /app/config.toml
       - type: bind
-        source: ./withdrawals_signer_data
+        source: ./signer_data
         target: /data
     depends_on:
       utu_api:

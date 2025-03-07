@@ -157,6 +157,9 @@ services:
         source: ./signer_data
         target: /data
       - type: bind
+        source: ./databases/deposit
+        target: /databases
+      - type: bind
         source: ./history/finalized_deposits
         target: /app/finalized_deposits
     depends_on:
@@ -179,6 +182,9 @@ services:
       - type: bind
         source: ./withdrawals_signer_config.toml
         target: /app/config.toml
+      - type: bind
+        source: ./databases/withdrawals
+        target: /databases
       - type: bind
         source: ./signer_data
         target: /data

@@ -227,7 +227,7 @@ services:
   # port: 8086
   utu_bridge_deposits_indexer:
     build:
-      context: https://github.com/lfglabs-dev/utu_bridge_indexer.git#main
+      context: https://github.com/lfglabs-dev/utu_bridge_indexer.git#07c1ed5bd998103442d15abdc6726572485fc1f4
       dockerfile: Dockerfile
     command:
       - run
@@ -251,7 +251,7 @@ services:
   # port: 8087
   utu_bridge_withdrawals_indexer:
     build:
-      context: https://github.com/lfglabs-dev/utu_bridge_indexer.git#main
+      context: https://github.com/lfglabs-dev/utu_bridge_indexer.git#07c1ed5bd998103442d15abdc6726572485fc1f4
       dockerfile: Dockerfile
     command:
       - run
